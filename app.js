@@ -27,6 +27,18 @@ app.get('/', async (req, res) => {
   });
 });
 
+app.get('/posts/:id', async (req, res) => {
+
+  // tıklanan postun id'sini aldık
+  const post = await Post.findById(req.params.id)
+  
+  // post.ejs dosyasına gönderdik postu
+  res.render('post', {
+    post
+  });
+
+});
+
 app.get('/about', (req, res) => {
   res.render('about');
 });
