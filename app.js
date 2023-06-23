@@ -1,8 +1,11 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const ejs = require('ejs');
+const methodOverride = require('method-override');
 const path = require('path');
 const Post = require('./models/Post');
+const pageController = require('./controllers/pageControllers');
+const postController = require('./controllers/postControllers');
 
 const app = express();
 
@@ -19,38 +22,23 @@ app.set('view engine', 'ejs');
 app.use(express.static('public')); // static dosyalarımızın public klasörü içinde olduğunu belirtik.
 app.use(express.urlencoded({ extended: true })); // url'deki datayı okumamızı sağlar.
 app.use(express.json()); // url'deki datayı json formatına döndürür.
+app.use(
+  methodOverride('_method', {
+    methods: ['GET', 'POST'],
+  })
+);
 
-app.get('/', async (req, res) => {
-  const posts = await Post.find({});
-  res.render('index', {
-    posts,
-  });
-});
+app.get('/', postController.getAllPosts);
 
-app.get('/posts/:id', async (req, res) => {
+app.get('/posts/:id', postController.getPost);
 
-  // tıklanan postun id'sini aldık
-  const post = await Post.findById(req.params.id)
-  
-  // post.ejs dosyasına gönderdik postu
-  res.render('post', {
-    post
-  });
+app.get('/about', pageController.getAboutPage);
+app.get('/add_post', pageController.getAddPostPage);
+app.get('/posts/edit/:id', pageController.getEditPage);
 
-});
-
-app.get('/about', (req, res) => {
-  res.render('about');
-});
-
-app.get('/add_post', (req, res) => {
-  res.render('add_post');
-});
-
-app.post('/posts', async (req, res) => {
-  await Post.create(req.body);
-  res.redirect('/');
-});
+app.post('/posts', postController.createPost);
+app.put('/posts/:id', postController.updatePost);
+app.delete('/posts/:id', postController.deletePost);
 
 const port = 3000;
 
